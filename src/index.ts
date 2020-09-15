@@ -98,12 +98,8 @@ export class FirestoreRemote implements Remote {
     // new messages to write.
     const writes = [];
 
-    console.log('existingMerkle', existingMerkle);
-    console.log('newMerkle', newMerkle);
-
     // write an updated merkle if we changed it
     if (existingMerkle.diff(newMerkle)) {
-      console.log('writing new merkle');
       const write = {
         update: {
           name: this.merkleDocPath,
@@ -136,9 +132,6 @@ export class FirestoreRemote implements Remote {
       await this.api('post', ':commit', { writes });
       // TODO: check if the writes went thru, if not retry
     }
-
-    console.log('req.merkle', req.merkle);
-    console.log('newMerkle', newMerkle);
 
     let pendingIncoming: Message[] = [];
 
