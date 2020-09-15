@@ -1,0 +1,8 @@
+/.eslintrc.js
+/.github
+/.vscode
+/dist/bundle
+/dist/test
+/src
+/test
+/tsconfig.json
