@@ -1,25 +1,20 @@
-import { makeFirebaseAPI, FirebaseConfig } from '@daaku/firebase-rest-api';
+import {
+  makeFirebaseAPI,
+  FirebaseConfig,
+  FirebaseAPI,
+} from '@daaku/firebase-rest-api';
 import { Timestamp, Message, Merkle } from '@daaku/kombat';
 import { customAlphabet } from 'nanoid';
 import { FirestoreRemote } from '../src';
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz', 16);
 const nodeID = nanoid();
-const falconID = nanoid();
 const yodaID = nanoid();
 
 const firebaseConfig = new FirebaseConfig({
   apiKey: 'AIzaSyCnFgFqO3d7RbJDcNAp_eO21KSOISCP9IU',
   projectID: 'fidb-unit-test',
 });
-
-const falconNameMessage: Message = {
-  timestamp: new Timestamp(1599729600000, 0, nodeID).toJSON(),
-  dataset: 'spaceship',
-  row: falconID,
-  column: 'name',
-  value: 'Falcon',
-} as const;
 
 const yodaNameMessage: Message = {
   timestamp: new Timestamp(1599729700000, 0, nodeID).toJSON(),
@@ -74,6 +69,38 @@ async function deleteUser(
   return await res.json();
 }
 
+async function deleteUserData(
+  config: FirebaseConfig,
+  api: FirebaseAPI,
+  localID: string,
+): Promise<void> {
+  const res = (await api('post', ':runQuery', {
+    structuredQuery: {
+      from: [
+        {
+          collectionId: 'message_log',
+        },
+      ],
+      where: {
+        fieldFilter: {
+          op: 'EQUAL',
+          field: { fieldPath: 'groupID' },
+          value: {
+            stringValue: localID,
+          },
+        },
+      },
+    },
+  })) as any[];
+  const writes = [
+    { delete: config.docPath(`merkle/${localID}`) },
+    ...res.map((d) => {
+      return { delete: d.document.name };
+    }),
+  ];
+  await api('post', ':commit', { writes });
+}
+
 QUnit.test('Sync It', async (assert) => {
   const user = await signUp(firebaseConfig);
   const firebaseAPI = makeFirebaseAPI({
@@ -126,4 +153,7 @@ QUnit.test('Sync It', async (assert) => {
     merkle: merkle1,
     messages: messages2,
   });
+
+  await deleteUserData(firebaseConfig, firebaseAPI, user.localId);
+  await deleteUser(firebaseConfig, user.idToken);
 });
