@@ -5,7 +5,7 @@ import {
 } from '@daaku/firebase-rest-api';
 import { Timestamp, Message, Merkle } from '@daaku/kombat';
 import { customAlphabet } from 'nanoid';
-import { FirestoreRemote } from '../src';
+import { RemoteFirestore } from '../src';
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz', 16);
 const nodeID = nanoid();
@@ -111,7 +111,7 @@ QUnit.test('Sync It', async (assert) => {
   });
 
   const merkle1 = new Merkle();
-  const remote1 = new FirestoreRemote({
+  const remote1 = new RemoteFirestore({
     config: firebaseConfig,
     api: firebaseAPI,
     groupID: user.localId,
@@ -133,7 +133,7 @@ QUnit.test('Sync It', async (assert) => {
   });
 
   const merkle2 = new Merkle();
-  const remote2 = new FirestoreRemote({
+  const remote2 = new RemoteFirestore({
     config: firebaseConfig,
     api: firebaseAPI,
     groupID: user.localId,

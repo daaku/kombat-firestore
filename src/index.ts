@@ -11,7 +11,7 @@ function docToMsg(doc: any): Message {
   };
 }
 
-export class FirestoreRemote implements Remote {
+export class RemoteFirestore implements Remote {
   private readonly merkleDocPath: string;
   private readonly config: FirebaseConfig;
   private readonly api: FirebaseAPI;
