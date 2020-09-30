@@ -1,5 +1,5 @@
 module.exports = {
-  extends: 'daaku',
+  extends: '@daaku',
   rules: {
     '@typescript-eslint/no-explicit-any': 0,
   },
