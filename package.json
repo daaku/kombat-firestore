@@ -1,7 +1,7 @@
 {
   "name": "@daaku/kombat-firestore",
   "author": "Naitik Shah <n@daaku.org>",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Kombat storage implemented using Firebase Firestore.",
   "repository": "git@github.com:daaku/kombat-firestore",
   "main": "dist/src/index.js",
@@ -14,7 +14,7 @@
     "build:js": "tsc",
     "build:test": "esbuild --bundle --sourcemap --define:process.env.NODE_ENV=\\\"production\\\" --outdir=dist/bundle test/tests.ts --main-fields=module,main",
     "test": "npm run build:test && TIMEOUT=30000 qunit-puppeteer",
-    "build": "run-p check:lint test build:js",
+    "build": "run-p check build:js",
     "deploy": "npm run build && npm publish --access=public"
   },
   "keywords": [
@@ -26,17 +26,17 @@
   "license": "MIT",
   "devDependencies": {
     "@daaku/eslint-config": "^3.0.0",
-    "@daaku/qunit-puppeteer": "^0.1.2",
+    "@daaku/qunit-puppeteer": "^0.1.3",
     "@types/qunit": "^2.9.5",
-    "esbuild": "^0.7.8",
-    "eslint": "^7.10.0",
+    "esbuild": "^0.7.15",
+    "eslint": "^7.11.0",
     "nanoid": "^3.1.12",
     "npm-run-all": "^4.1.5",
-    "qunit": "^2.11.2",
+    "qunit": "^2.11.3",
     "typescript": "^4.0.3"
   },
   "dependencies": {
     "@daaku/firebase-rest-api": "^0.1.0",
-    "@daaku/kombat": "^0.1.4"
+    "@daaku/kombat": "^0.1.5"
   }
 }
