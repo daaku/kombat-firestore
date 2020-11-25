@@ -1,10 +1,11 @@
 import {
-  makeFirebaseAPI,
-  FirebaseConfig,
   FirebaseAPI,
+  FirebaseConfig,
+  makeFirebaseAPI,
 } from '@daaku/firebase-rest-api';
-import { Timestamp, Message, Merkle } from '@daaku/kombat';
+import { Merkle, Message, Timestamp } from '@daaku/kombat';
 import { customAlphabet } from 'nanoid';
+
 import { RemoteFirestore } from '../src';
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz', 16);

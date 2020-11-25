@@ -1,5 +1,5 @@
-import { SyncRequest, Remote, Message, Timestamp, Merkle } from '@daaku/kombat';
-import type { FirebaseConfig, FirebaseAPI } from '@daaku/firebase-rest-api';
+import type { FirebaseAPI, FirebaseConfig } from '@daaku/firebase-rest-api';
+import { Merkle, Message, Remote, SyncRequest, Timestamp } from '@daaku/kombat';
 
 function docToMsg(doc: any): Message {
   return {
