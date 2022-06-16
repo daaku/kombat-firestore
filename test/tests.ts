@@ -6,7 +6,7 @@ import {
 import { Merkle, Message, Timestamp } from '@daaku/kombat';
 import { customAlphabet } from 'nanoid';
 
-import { RemoteFirestore } from '../src';
+import { RemoteFirestore } from '../src/index.js';
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz', 16);
 const nodeID = nanoid();
