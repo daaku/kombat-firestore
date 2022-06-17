@@ -47,7 +47,7 @@
     "typescript": "^4.4.4"
   },
   "dependencies": {
-    "@daaku/firebase-rest-api": "^1.1.0",
+    "@daaku/firebase-rest-api": "^2.1.0",
     "@daaku/kombat": "^2.0.0"
   }
 }
