@@ -41,6 +41,14 @@ const yodaAge950Message: Message = {
   value: 950,
 } as const;
 
+const yodaDeleteNameMessage: Message = {
+  timestamp: new Timestamp(1599729900000, 0, nodeID).toJSON(),
+  dataset: 'people',
+  row: yodaID,
+  column: 'age',
+  value: undefined,
+} as const;
+
 interface NewUser {
   idToken: string;
   refreshToken: string;
@@ -145,7 +153,7 @@ QUnit.test('Sync It', async (assert) => {
   });
   assert.deepEqual(result.messages, messages1);
 
-  const messages2 = [yodaAge950Message];
+  const messages2 = [yodaAge950Message, yodaDeleteNameMessage];
   messages2.forEach((msg) => {
     merkle1.insert(Timestamp.fromJSON(msg.timestamp));
   });

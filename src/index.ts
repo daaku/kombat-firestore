@@ -2,12 +2,16 @@ import type { FirebaseAPI, FirebaseConfig } from '@daaku/firebase-rest-api';
 import { Merkle, Message, Remote, SyncRequest, Timestamp } from '@daaku/kombat';
 
 function docToMsg(doc: any): Message {
+  let value: undefined;
+  if (doc.document.fields.value) {
+    value = JSON.parse(doc.document.fields.value.stringValue);
+  }
   return {
     timestamp: doc.document.fields.timestamp.stringValue,
     dataset: doc.document.fields.dataset.stringValue,
     row: doc.document.fields.row.stringValue,
     column: doc.document.fields.column.stringValue,
-    value: JSON.parse(doc.document.fields.value.stringValue),
+    value,
   };
 }
 
@@ -37,6 +41,10 @@ export class RemoteFirestore implements Remote {
   }
 
   private msgUpdateDoc(msg: Message): any {
+    let value = undefined;
+    if (msg.value !== undefined) {
+      value = { stringValue: JSON.stringify(msg.value) };
+    }
     return {
       update: {
         name: this.msgDocPath(msg.timestamp),
@@ -46,7 +54,7 @@ export class RemoteFirestore implements Remote {
           dataset: { stringValue: msg.dataset },
           row: { stringValue: msg.row },
           column: { stringValue: msg.column },
-          value: { stringValue: JSON.stringify(msg.value) },
+          value,
         },
       },
     };
