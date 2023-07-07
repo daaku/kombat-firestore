@@ -6,9 +6,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - name: Setup Node
-      uses: actions/setup-node@v3.6.0
+      uses: actions/setup-node@v3
       with:
-        node-version: '16'
+        node-version: current
     - uses: actions/checkout@v3
     - name: Dependencies
       run: npm install
