@@ -1,26 +1,26 @@
-import QUnit from 'qunit';
-import 'qunit/qunit/qunit.css';
+import QUnit from 'qunit'
+import 'qunit/qunit/qunit.css'
 import {
   FirebaseAPI,
   FirebaseConfig,
   makeFirebaseAPI,
-} from '@daaku/firebase-rest-api';
-import { Merkle, Message, Timestamp } from '@daaku/kombat';
-import { customAlphabet } from 'nanoid';
+} from '@daaku/firebase-rest-api'
+import { Merkle, Message, Timestamp } from '@daaku/kombat'
+import { customAlphabet } from 'nanoid'
 
-import { RemoteFirestore } from '../src/index.js';
+import { RemoteFirestore } from '../src/index.js'
 
 // @ts-ignore
-window.HARNESS_RUN_END && QUnit.on('runEnd', window.HARNESS_RUN_END);
+window.HARNESS_RUN_END && QUnit.on('runEnd', window.HARNESS_RUN_END)
 
-const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz', 16);
-const nodeID = nanoid();
-const yodaID = nanoid();
+const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz', 16)
+const nodeID = nanoid()
+const yodaID = nanoid()
 
 const firebaseConfig = new FirebaseConfig({
   apiKey: 'AIzaSyCnFgFqO3d7RbJDcNAp_eO21KSOISCP9IU',
   projectID: 'fidb-unit-test',
-});
+})
 
 const yodaNameMessage: Message = {
   timestamp: new Timestamp(1599729700000, 0, nodeID).toJSON(),
@@ -28,7 +28,7 @@ const yodaNameMessage: Message = {
   row: yodaID,
   column: 'name',
   value: 'Yoda',
-} as const;
+} as const
 
 const yodaAge900Message: Message = {
   timestamp: new Timestamp(1599729800000, 0, nodeID).toJSON(),
@@ -36,7 +36,7 @@ const yodaAge900Message: Message = {
   row: yodaID,
   column: 'age',
   value: 900,
-} as const;
+} as const
 
 const yodaAge950Message: Message = {
   timestamp: new Timestamp(1599729900000, 0, nodeID).toJSON(),
@@ -44,7 +44,7 @@ const yodaAge950Message: Message = {
   row: yodaID,
   column: 'age',
   value: 950,
-} as const;
+} as const
 
 const yodaDeleteNameMessage: Message = {
   timestamp: new Timestamp(1599729900000, 0, nodeID).toJSON(),
@@ -52,21 +52,21 @@ const yodaDeleteNameMessage: Message = {
   row: yodaID,
   column: 'age',
   value: undefined,
-} as const;
+} as const
 
 interface NewUser {
-  idToken: string;
-  refreshToken: string;
-  expiresIn: string;
-  localId: string;
+  idToken: string
+  refreshToken: string
+  expiresIn: string
+  localId: string
 }
 
 async function signUp(config: FirebaseConfig): Promise<NewUser> {
   const res = await fetch(
     `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${config.apiKey}`,
     { method: 'post' },
-  );
-  return await res.json();
+  )
+  return await res.json()
 }
 
 async function deleteUser(
@@ -79,8 +79,8 @@ async function deleteUser(
       method: 'post',
       body: JSON.stringify({ idToken }),
     },
-  );
-  return await res.json();
+  )
+  return await res.json()
 }
 
 async function deleteUserData(
@@ -105,69 +105,69 @@ async function deleteUserData(
         },
       },
     },
-  })) as any[];
+  })) as any[]
   const writes = [
     { delete: config.docPath(`merkle/${localID}`) },
-    ...res.map((d) => {
-      return { delete: d.document.name };
+    ...res.map(d => {
+      return { delete: d.document.name }
     }),
-  ];
-  await api('post', ':commit', { writes });
+  ]
+  await api('post', ':commit', { writes })
 }
 
-QUnit.test('Sync It', async (assert) => {
-  const user = await signUp(firebaseConfig);
+QUnit.test('Sync It', async assert => {
+  const user = await signUp(firebaseConfig)
   const firebaseAPI = makeFirebaseAPI({
     config: firebaseConfig,
     tokenSource: async () => {
-      return user.idToken;
+      return user.idToken
     },
-  });
+  })
 
-  const merkle1 = new Merkle();
+  const merkle1 = new Merkle()
   const remote1 = new RemoteFirestore({
     config: firebaseConfig,
     api: firebaseAPI,
     groupID: user.localId,
-  });
+  })
 
-  const messages1 = [yodaNameMessage, yodaAge900Message];
-  messages1.forEach((msg) => {
-    merkle1.insert(Timestamp.fromJSON(msg.timestamp));
-  });
-
-  await remote1.sync({
-    merkle: merkle1,
-    messages: messages1,
-  });
+  const messages1 = [yodaNameMessage, yodaAge900Message]
+  messages1.forEach(msg => {
+    merkle1.insert(Timestamp.fromJSON(msg.timestamp))
+  })
 
   await remote1.sync({
     merkle: merkle1,
     messages: messages1,
-  });
+  })
 
-  const merkle2 = new Merkle();
+  await remote1.sync({
+    merkle: merkle1,
+    messages: messages1,
+  })
+
+  const merkle2 = new Merkle()
   const remote2 = new RemoteFirestore({
     config: firebaseConfig,
     api: firebaseAPI,
     groupID: user.localId,
-  });
+  })
   const result = await remote2.sync({
     merkle: merkle2,
     messages: [],
-  });
-  assert.deepEqual(result.messages, messages1);
+  })
+  assert.deepEqual(result.messages, messages1)
 
-  const messages2 = [yodaAge950Message, yodaDeleteNameMessage];
-  messages2.forEach((msg) => {
-    merkle1.insert(Timestamp.fromJSON(msg.timestamp));
-  });
+  const messages2 = [yodaAge950Message, yodaDeleteNameMessage]
+  messages2.forEach(msg => {
+    merkle1.insert(Timestamp.fromJSON(msg.timestamp))
+  })
 
   await remote1.sync({
     merkle: merkle1,
     messages: messages2,
-  });
+  })
 
-  await deleteUserData(firebaseConfig, firebaseAPI, user.localId);
-  await deleteUser(firebaseConfig, user.idToken);
-});
+  await deleteUserData(firebaseConfig, firebaseAPI, user.localId)
+  await deleteUser(firebaseConfig, user.idToken)
+})

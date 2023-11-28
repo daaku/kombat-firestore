@@ -1,10 +1,10 @@
-import type { FirebaseAPI, FirebaseConfig } from '@daaku/firebase-rest-api';
-import { Merkle, Message, Remote, SyncRequest, Timestamp } from '@daaku/kombat';
+import type { FirebaseAPI, FirebaseConfig } from '@daaku/firebase-rest-api'
+import { Merkle, Message, Remote, SyncRequest, Timestamp } from '@daaku/kombat'
 
 function docToMsg(doc: any): Message {
-  let value: undefined;
+  let value: undefined
   if (doc.document.fields.value) {
-    value = JSON.parse(doc.document.fields.value.stringValue);
+    value = JSON.parse(doc.document.fields.value.stringValue)
   }
   return {
     timestamp: doc.document.fields.timestamp.stringValue,
@@ -12,38 +12,38 @@ function docToMsg(doc: any): Message {
     row: doc.document.fields.row.stringValue,
     column: doc.document.fields.column.stringValue,
     value,
-  };
+  }
 }
 
 export class RemoteFirestore implements Remote {
-  private readonly merkleDocPath: string;
-  private readonly config: FirebaseConfig;
-  private readonly api: FirebaseAPI;
-  private readonly groupID: string;
+  private readonly merkleDocPath: string
+  private readonly config: FirebaseConfig
+  private readonly api: FirebaseAPI
+  private readonly groupID: string
 
   constructor({
     config,
     api,
     groupID,
   }: {
-    config: FirebaseConfig;
-    api: FirebaseAPI;
-    groupID: string;
+    config: FirebaseConfig
+    api: FirebaseAPI
+    groupID: string
   }) {
-    this.config = config;
-    this.api = api;
-    this.groupID = groupID;
-    this.merkleDocPath = this.config.docPath(`merkle/${this.groupID}`);
+    this.config = config
+    this.api = api
+    this.groupID = groupID
+    this.merkleDocPath = this.config.docPath(`merkle/${this.groupID}`)
   }
 
   private msgDocPath(timestamp: string): string {
-    return this.config.docPath(`message_log/${timestamp}`);
+    return this.config.docPath(`message_log/${timestamp}`)
   }
 
   private msgUpdateDoc(msg: Message): any {
-    let value = undefined;
+    let value = undefined
     if (msg.value !== undefined) {
-      value = { stringValue: JSON.stringify(msg.value) };
+      value = { stringValue: JSON.stringify(msg.value) }
     }
     return {
       update: {
@@ -57,7 +57,7 @@ export class RemoteFirestore implements Remote {
           value,
         },
       },
-    };
+    }
   }
 
   public async sync(req: SyncRequest): Promise<SyncRequest> {
@@ -65,46 +65,46 @@ export class RemoteFirestore implements Remote {
     const batchGet = (await this.api('post', ':batchGet', {
       documents: [
         this.merkleDocPath,
-        ...req.messages.map((msg) => this.msgDocPath(msg.timestamp)),
+        ...req.messages.map(msg => this.msgDocPath(msg.timestamp)),
       ],
       mask: { fieldPaths: ['merkle'] },
-    })) as any[];
+    })) as any[]
 
     // there are 3 merkle's involved, the merkle from the request, the existing
     // merkle on the firestore side, and the new merkle we need to store on the
     // firestore side.
 
     // calculate the new merkle for the firestore side.
-    const [merkleRaw, ...messages] = batchGet;
-    let existingMerkle = new Merkle();
-    let newMerkle = new Merkle();
-    let pendingSend: Message[] = [];
+    const [merkleRaw, ...messages] = batchGet
+    let existingMerkle = new Merkle()
+    let newMerkle = new Merkle()
+    let pendingSend: Message[] = []
     if (merkleRaw.missing) {
       // all messages should be missing, otherwise we're in a corrupt state.
-      if (messages.some((m) => m.found)) {
-        throw new Error('corruption: no merkle found, but messages were found');
+      if (messages.some(m => m.found)) {
+        throw new Error('corruption: no merkle found, but messages were found')
       }
-      pendingSend = req.messages;
+      pendingSend = req.messages
     } else {
       existingMerkle = Merkle.fromJSON(
         JSON.parse(merkleRaw.found.fields.merkle.stringValue),
-      );
-      newMerkle = existingMerkle.clone();
+      )
+      newMerkle = existingMerkle.clone()
       messages.forEach((m, index) => {
         if (m.missing) {
-          pendingSend.push(req.messages[index]);
+          pendingSend.push(req.messages[index])
         }
-      });
+      })
     }
 
     // update the merkle with the messages we'll be inserting, if any
-    pendingSend.forEach((m) => {
-      newMerkle.insert(Timestamp.fromJSON(m.timestamp));
-    });
+    pendingSend.forEach(m => {
+      newMerkle.insert(Timestamp.fromJSON(m.timestamp))
+    })
 
     // now collect the writes, if any. this will be updates to the merkle and
     // new messages to write.
-    const writes = [];
+    const writes = []
 
     // write an updated merkle if we changed it
     if (existingMerkle.diff(newMerkle)) {
@@ -115,37 +115,37 @@ export class RemoteFirestore implements Remote {
             merkle: { stringValue: JSON.stringify(newMerkle) },
           },
         },
-      } as any;
+      } as any
 
       // either update the exact document we just read, or ensure we're writing
       // a new one. this prevents race conditions.
       if (merkleRaw.found) {
         write.currentDocument = {
           updateTime: merkleRaw.updateTime,
-        };
+        }
       } else {
         write.currentDocument = {
           exists: false,
-        };
+        }
       }
 
-      writes.push(write);
+      writes.push(write)
     }
 
     // write all pending messages, if any
-    writes.push(...pendingSend.map(this.msgUpdateDoc.bind(this)));
+    writes.push(...pendingSend.map(this.msgUpdateDoc.bind(this)))
 
     // if we have something to write, then write it.
     if (writes.length > 0) {
-      await this.api('post', ':commit', { writes });
+      await this.api('post', ':commit', { writes })
       // TODO: check if the writes went thru, if not retry
     }
 
-    let pendingIncoming: Message[] = [];
+    let pendingIncoming: Message[] = []
 
     // if there are differences in the merkle after updating firestore, then
     // fetch pending incoming messages.
-    const diffTime = newMerkle.diff(req.merkle);
+    const diffTime = newMerkle.diff(req.merkle)
     if (diffTime) {
       const result = (await this.api('post', ':runQuery', {
         structuredQuery: {
@@ -186,14 +186,14 @@ export class RemoteFirestore implements Remote {
             },
           ],
         },
-      })) as any[];
-      pendingIncoming = result.map(docToMsg);
+      })) as any[]
+      pendingIncoming = result.map(docToMsg)
     }
 
     // return pending sync messages
     return {
       merkle: newMerkle,
       messages: pendingIncoming,
-    };
+    }
   }
 }
