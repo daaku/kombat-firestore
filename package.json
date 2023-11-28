@@ -1,7 +1,7 @@
 {
   "name": "@daaku/kombat-firestore",
   "author": "Naitik Shah <n@daaku.org>",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "Kombat storage implemented using Firebase Firestore.",
   "repository": "git@github.com:daaku/kombat-firestore",
   "license": "MIT",
