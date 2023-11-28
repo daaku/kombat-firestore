@@ -1,3 +1,5 @@
+import QUnit from 'qunit';
+import 'qunit/qunit/qunit.css';
 import {
   FirebaseAPI,
   FirebaseConfig,
@@ -7,6 +9,9 @@ import { Merkle, Message, Timestamp } from '@daaku/kombat';
 import { customAlphabet } from 'nanoid';
 
 import { RemoteFirestore } from '../src/index.js';
+
+// @ts-ignore
+window.HARNESS_RUN_END && QUnit.on('runEnd', window.HARNESS_RUN_END);
 
 const nanoid = customAlphabet('abcdefghijklmnopqrstuvwxyz', 16);
 const nodeID = nanoid();

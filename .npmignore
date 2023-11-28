@@ -1,8 +1,10 @@
-/.eslintrc.js
 /.github
 /.vscode
-/dist/bundle
-/dist/test
+/coverage
+/dist/*
 /src
 /test
 /tsconfig.json
+/vite.config.ts
+
+!/dist/src
