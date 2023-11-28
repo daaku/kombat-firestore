@@ -20,7 +20,7 @@
   },
   "scripts": {
     "build": "tsc",
-    "test": "vite build && URI=file://$PWD/dist/test/index.html TIMEOUT=30000 qunit-puppeteer",
+    "test": "vite build && TIMEOUT=30000 qunit-puppeteer",
     "deploy": "npm run test && npm publish --access=public",
     "prepare": "npm run build",
     "dev": "vite"
@@ -32,7 +32,7 @@
     "firestore"
   ],
   "devDependencies": {
-    "@daaku/qunit-puppeteer": "^3.0.0",
+    "@daaku/qunit-puppeteer": "^3.3.0",
     "@types/qunit": "^2.11.2",
     "nanoid": "^5.0.1",
     "qunit": "^2.17.2",
