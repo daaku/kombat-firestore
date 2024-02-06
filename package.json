@@ -31,7 +31,7 @@
     "firestore"
   ],
   "devDependencies": {
-    "@daaku/qunit-puppeteer": "^3.3.0",
+    "@daaku/qunit-puppeteer": "^4.0.0",
     "@types/qunit": "^2.11.2",
     "nanoid": "^5.0.1",
     "qunit": "^2.17.2",
