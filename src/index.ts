@@ -172,7 +172,7 @@ export class RemoteFirestore implements Remote {
                     op: 'GREATER_THAN_OR_EQUAL',
                     field: { fieldPath: 'timestamp' },
                     value: {
-                      stringValue: String(diffTime),
+                      stringValue: new Date(diffTime).toISOString(),
                     },
                   },
                 },
