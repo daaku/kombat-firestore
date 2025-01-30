@@ -1,14 +1,11 @@
 import QUnit from 'qunit'
 import 'qunit/qunit/qunit.css'
-import {
-  FirebaseAPI,
-  FirebaseConfig,
-  makeFirebaseAPI,
-} from '@daaku/firebase-rest-api'
+import { FirebaseConfig, makeFirebaseAPI } from '@daaku/firebase-rest-api'
 import { Merkle, Message, Timestamp } from '@daaku/kombat'
 import { customAlphabet } from 'nanoid'
 
 import { RemoteFirestore } from '../src/index.js'
+import { signUpAnon, deleteUser, deleteUserData } from '../src/test.js'
 
 // @ts-ignore
 window.HARNESS_RUN_END && QUnit.on('runEnd', window.HARNESS_RUN_END)
@@ -68,70 +65,9 @@ const yodaDeleteNameMessage: Message = {
   value: undefined,
 } as const
 
-interface NewUser {
-  idToken: string
-  refreshToken: string
-  expiresIn: string
-  localId: string
-}
-
-async function signUp(config: FirebaseConfig): Promise<NewUser> {
-  const res = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=${config.apiKey}`,
-    { method: 'post' },
-  )
-  return await res.json()
-}
-
-async function deleteUser(
-  config: FirebaseConfig,
-  idToken: string,
-): Promise<void> {
-  const res = await fetch(
-    `https://identitytoolkit.googleapis.com/v1/accounts:delete?key=${config.apiKey}`,
-    {
-      method: 'post',
-      body: JSON.stringify({ idToken }),
-    },
-  )
-  return await res.json()
-}
-
-async function deleteUserData(
-  config: FirebaseConfig,
-  api: FirebaseAPI,
-  localID: string,
-): Promise<void> {
-  const res = (await api('post', ':runQuery', {
-    structuredQuery: {
-      from: [
-        {
-          collectionId: 'message_log',
-        },
-      ],
-      where: {
-        fieldFilter: {
-          op: 'EQUAL',
-          field: { fieldPath: 'groupID' },
-          value: {
-            stringValue: localID,
-          },
-        },
-      },
-    },
-  })) as any[]
-  const writes = [
-    { delete: config.docPath(`merkle/${localID}`) },
-    ...res.map(d => {
-      return { delete: d.document.name }
-    }),
-  ]
-  await api('post', ':commit', { writes })
-}
-
 QUnit.test('Sync It', async assert => {
   assert.timeout(30000)
-  const user = await signUp(firebaseConfig)
+  const user = await signUpAnon(firebaseConfig)
   const firebaseAPI = makeFirebaseAPI({
     config: firebaseConfig,
     tokenSource: async () => {
