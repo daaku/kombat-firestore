@@ -182,6 +182,6 @@ QUnit.test('Sync It', async assert => {
     'resultCatchUp should return messages2',
   )
 
-  await deleteUserData(firebaseConfig, firebaseAPI, user.localId)
+  await deleteUserData(firebaseAPI, user.localId)
   await deleteUser(firebaseConfig, user.idToken)
 })

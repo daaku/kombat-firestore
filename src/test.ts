@@ -29,34 +29,78 @@ export async function deleteUser(
   return await res.json()
 }
 
+const whereGroupID = (groupID: string) => ({
+  compositeFilter: {
+    op: 'OR',
+    filters: [
+      {
+        fieldFilter: {
+          op: 'EQUAL',
+          field: { fieldPath: 'groupID' },
+          value: {
+            stringValue: groupID,
+          },
+        },
+      },
+      {
+        compositeFilter: {
+          op: 'AND',
+          filters: [
+            {
+              fieldFilter: {
+                op: 'GREATER_THAN_OR_EQUAL',
+                field: { fieldPath: 'groupID' },
+                value: {
+                  stringValue: `${groupID}.`,
+                },
+              },
+            },
+            {
+              fieldFilter: {
+                op: 'LESS_THAN',
+                field: { fieldPath: 'groupID' },
+                value: {
+                  // the slash is char code 47, one more than the '.'
+                  stringValue: `${groupID}/`,
+                },
+              },
+            },
+          ],
+        },
+      },
+    ],
+  },
+})
+
 export async function deleteUserData(
-  config: FirebaseConfig,
   api: FirebaseAPI,
   localID: string,
 ): Promise<void> {
-  const res = (await api('post', ':runQuery', {
+  const merkles = (await api('post', ':runQuery', {
+    structuredQuery: {
+      from: [
+        {
+          collectionId: 'merkle',
+        },
+      ],
+      where: whereGroupID(localID),
+    },
+  })) as any[]
+  const messages = (await api('post', ':runQuery', {
     structuredQuery: {
       from: [
         {
           collectionId: 'message_log',
         },
       ],
-      where: {
-        fieldFilter: {
-          op: 'EQUAL',
-          field: { fieldPath: 'groupID' },
-          value: {
-            stringValue: localID,
-          },
-        },
-      },
+      where: whereGroupID(localID),
     },
   })) as any[]
-  const writes = [
-    { delete: config.docPath(`merkle/${localID}`) },
-    ...res.map(d => {
+  const writes = merkles
+    .concat(messages)
+    .filter(d => d.document)
+    .map(d => {
       return { delete: d.document.name }
-    }),
-  ]
+    })
   await api('post', ':commit', { writes })
 }

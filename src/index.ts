@@ -112,6 +112,7 @@ export class RemoteFirestore implements Remote {
         update: {
           name: this.merkleDocPath,
           fields: {
+            groupID: { stringValue: this.groupID },
             merkle: { stringValue: JSON.stringify(newMerkle) },
           },
         },
