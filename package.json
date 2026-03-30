@@ -1,13 +1,16 @@
 {
   "name": "@daaku/kombat-firestore",
   "author": "Naitik Shah <n@daaku.org>",
-  "version": "2.7.0",
+  "version": "2.8.0",
   "description": "Kombat storage implemented using Firebase Firestore.",
   "repository": "git@github.com:daaku/kombat-firestore",
   "license": "MIT",
   "type": "module",
   "exports": {
-    ".": { "import": "./dist/src/index.js", "types": "./dist/src/index.d.ts" },
+    ".": {
+      "import": "./dist/src/index.js",
+      "types": "./dist/src/index.d.ts"
+    },
     "./test": {
       "import": "./dist/src/test.js",
       "types": "./dist/src/test.d.ts"
@@ -24,7 +27,12 @@
     "prepare": "tsc",
     "dev": "vite"
   },
-  "keywords": ["kombat", "crdt", "firebase", "firestore"],
+  "keywords": [
+    "kombat",
+    "crdt",
+    "firebase",
+    "firestore"
+  ],
   "devDependencies": {
     "@daaku/qunit-puppeteer": "^4.1.0",
     "@types/qunit": "^2.19.13",
